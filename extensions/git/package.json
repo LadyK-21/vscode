@@ -2726,7 +2726,7 @@
     "@types/byline": "4.2.31",
     "@types/file-type": "^5.2.1",
     "@types/mocha": "^9.1.1",
-    "@types/node": "16.x",
+    "@types/node": "18.0.3",
     "@types/picomatch": "2.3.0",
     "@types/which": "^1.0.28"
   },
