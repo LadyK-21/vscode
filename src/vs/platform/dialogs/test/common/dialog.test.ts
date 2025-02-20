@@ -4,10 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { deepEqual } from 'assert';
-import { isLinux, isMacintosh, isWindows } from 'vs/base/common/platform';
-import { IMassagedMessageBoxOptions, massageMessageBoxOptions } from 'vs/platform/dialogs/common/dialogs';
-import product from 'vs/platform/product/common/product';
-import { IProductService } from 'vs/platform/product/common/productService';
+import { isLinux, isMacintosh, isWindows } from '../../../../base/common/platform.js';
+import { ensureNoDisposablesAreLeakedInTestSuite } from '../../../../base/test/common/utils.js';
+import { IMassagedMessageBoxOptions, massageMessageBoxOptions } from '../../common/dialogs.js';
+import product from '../../../product/common/product.js';
+import { IProductService } from '../../../product/common/productService.js';
 
 suite('Dialog', () => {
 
@@ -59,7 +60,6 @@ suite('Dialog', () => {
 		const fourButtonCancel_4 = massageMessageBoxOptions({ buttons: ['1', '2', '3', '4'], cancelId: 4, message: 'message' }, testProductService);
 		const fourButtonNegativeCancel = massageMessageBoxOptions({ buttons: ['1', '2', '3', '4'], cancelId: -1, message: 'message' }, testProductService);
 
-		// Windows: cancel button is always at the end
 		if (isWindows) {
 			assertOptions(oneButtonNoCancel, ['1'], 0, 0, [0]);
 			assertOptions(oneButtonCancel_0, ['1'], 0, 0, [0]);
@@ -86,18 +86,15 @@ suite('Dialog', () => {
 			assertOptions(fourButtonCancel_3, ['1', '2', '3', '4'], 0, 3, [0, 1, 2, 3]);
 			assertOptions(fourButtonCancel_4, ['1', '2', '3', '4'], 0, 4, [0, 1, 2, 3]);
 			assertOptions(fourButtonNegativeCancel, ['1', '2', '3', '4'], 0, -1, [0, 1, 2, 3]);
-		}
-
-		// macOS: puts cancel button after the first button
-		else if (isMacintosh) {
+		} else if (isMacintosh) {
 			assertOptions(oneButtonNoCancel, ['1'], 0, 0, [0]);
 			assertOptions(oneButtonCancel_0, ['1'], 0, 0, [0]);
 			assertOptions(oneButtonCancel_1, ['1'], 0, 1, [0]);
 			assertOptions(oneButtonNegativeCancel, ['1'], 0, -1, [0]);
 
-			assertOptions(twoButtonNoCancel, ['2', '1'], 0, 0, [1, 0]);
-			assertOptions(twoButtonCancel_0, ['1', '2'], 0, 0, [0, 1]);
-			assertOptions(twoButtonCancel_1, ['2', '1'], 0, 0, [1, 0]);
+			assertOptions(twoButtonNoCancel, ['1', '2'], 0, 1, [0, 1]);
+			assertOptions(twoButtonCancel_0, ['2', '1'], 0, 1, [1, 0]);
+			assertOptions(twoButtonCancel_1, ['1', '2'], 0, 1, [0, 1]);
 			assertOptions(twoButtonCancel_2, ['1', '2'], 0, 2, [0, 1]);
 			assertOptions(twoButtonNegativeCancel, ['1', '2'], 0, -1, [0, 1]);
 
@@ -108,18 +105,14 @@ suite('Dialog', () => {
 			assertOptions(threeButtonCancel_3, ['1', '2', '3'], 0, 3, [0, 1, 2]);
 			assertOptions(threeButtonNegativeCancel, ['1', '2', '3'], 0, -1, [0, 1, 2]);
 
-			assertOptions(fourButtonNoCancel, ['1', '2', '4', '3'], 0, 2, [0, 1, 3, 2]);
-			assertOptions(fourButtonCancel_0, ['2', '3', '1', '4'], 0, 2, [1, 2, 0, 3]);
-			assertOptions(fourButtonCancel_1, ['1', '3', '2', '4'], 0, 2, [0, 2, 1, 3]);
-			assertOptions(fourButtonCancel_2, ['1', '2', '3', '4'], 0, 2, [0, 1, 2, 3]);
-			assertOptions(fourButtonCancel_3, ['1', '2', '4', '3'], 0, 2, [0, 1, 3, 2]);
+			assertOptions(fourButtonNoCancel, ['1', '4', '2', '3'], 0, 1, [0, 3, 1, 2]);
+			assertOptions(fourButtonCancel_0, ['2', '1', '3', '4'], 0, 1, [1, 0, 2, 3]);
+			assertOptions(fourButtonCancel_1, ['1', '2', '3', '4'], 0, 1, [0, 1, 2, 3]);
+			assertOptions(fourButtonCancel_2, ['1', '3', '2', '4'], 0, 1, [0, 2, 1, 3]);
+			assertOptions(fourButtonCancel_3, ['1', '4', '2', '3'], 0, 1, [0, 3, 1, 2]);
 			assertOptions(fourButtonCancel_4, ['1', '2', '3', '4'], 0, 4, [0, 1, 2, 3]);
 			assertOptions(fourButtonNegativeCancel, ['1', '2', '3', '4'], 0, -1, [0, 1, 2, 3]);
-		}
-
-		// Linux: reverses buttons and puts cancel button
-		// after the first button
-		else if (isLinux) {
+		} else if (isLinux) {
 			assertOptions(oneButtonNoCancel, ['1'], 0, 0, [0]);
 			assertOptions(oneButtonCancel_0, ['1'], 0, 0, [0]);
 			assertOptions(oneButtonCancel_1, ['1'], 0, 1, [0]);
@@ -147,4 +140,6 @@ suite('Dialog', () => {
 			assertOptions(fourButtonNegativeCancel, ['4', '3', '2', '1'], 3, -1, [3, 2, 1, 0]);
 		}
 	});
+
+	ensureNoDisposablesAreLeakedInTestSuite();
 });
