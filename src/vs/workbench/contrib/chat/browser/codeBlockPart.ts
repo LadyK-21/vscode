@@ -89,6 +89,8 @@ export interface ICodeBlockData {
 
 	readonly parentContextKeyService?: IContextKeyService;
 	readonly renderOptions?: ICodeBlockRenderOptions;
+
+	readonly chatSessionId: string;
 }
 
 /**
@@ -135,6 +137,8 @@ export interface ICodeBlockActionContext {
 	languageId?: string;
 	codeBlockIndex: number;
 	element: unknown;
+
+	chatSessionId: string | undefined;
 }
 
 export interface ICodeBlockRenderOptions {
@@ -211,6 +215,7 @@ export class CodeBlockPart extends Disposable {
 			},
 			ariaLabel: localize('chat.codeBlockHelp', 'Code block'),
 			overflowWidgetsDomNode,
+			tabFocusMode: true,
 			...this.getEditorOptionsFromConfig(),
 		});
 
@@ -407,8 +412,13 @@ export class CodeBlockPart extends Disposable {
 
 		this.editor.updateOptions({
 			...this.getEditorOptionsFromConfig(),
-			ariaLabel: localize('chat.codeBlockLabel', "Code block {0}", data.codeBlockIndex + 1),
 		});
+		if (!this.editor.getOption(EditorOption.ariaLabel)) {
+			// Don't override the ariaLabel if it was set by the editor options
+			this.editor.updateOptions({
+				ariaLabel: localize('chat.codeBlockLabel', "Code block {0}", data.codeBlockIndex + 1),
+			});
+		}
 		this.layout(width);
 		this.toolbar.setAriaLabel(localize('chat.codeBlockToolbarLabel', "Code block {0}", data.codeBlockIndex + 1));
 		if (data.renderOptions?.hideToolbar) {
@@ -451,6 +461,7 @@ export class CodeBlockPart extends Disposable {
 			element: data.element,
 			languageId: textModel.getLanguageId(),
 			codemapperUri: data.codemapperUri,
+			chatSessionId: data.chatSessionId
 		} satisfies ICodeBlockActionContext;
 		this.resourceContextKey.set(textModel.uri);
 	}
